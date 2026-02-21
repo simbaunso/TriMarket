@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+export const maxDuration = 30;
+
 const OPINION_PUBLIC = 'https://proxy.opinion.trade:8443/api/bsc/api/v2';
 const OPINION_OPENAPI = 'https://proxy.opinion.trade:8443/openapi';
 

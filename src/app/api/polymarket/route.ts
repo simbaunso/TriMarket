@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+export const maxDuration = 30;
+
 const GAMMA_API = 'https://gamma-api.polymarket.com';
 
 const ALLOWED = ['events', 'markets'];

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+export const maxDuration = 30;
+
 const KALSHI_API = 'https://api.elections.kalshi.com/trade-api/v2';
 
 const ALLOWED = ['events', 'markets', 'series'];
