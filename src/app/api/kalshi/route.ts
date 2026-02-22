@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const res = await fetch(`${KALSHI_API}/${endpoint}?${params.toString()}`, {
-      next: { revalidate: 120 },
+      next: { revalidate: 86400 },
     });
 
     if (!res.ok) {
@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
 
     const data = await res.json();
     return NextResponse.json(data, {
-      headers: { 'Cache-Control': 'public, s-maxage=120, stale-while-revalidate=300' },
+      headers: { 'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=86400' },
     });
   } catch (error) {
     return NextResponse.json(
