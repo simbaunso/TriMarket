@@ -32,7 +32,6 @@ function deriveCategory(tags: string[], title: string): string {
 // ─── Polymarket ───────────────────────────────────────────
 async function fetchPolymarket(limit = 30): Promise<Market[]> {
   const params = new URLSearchParams({
-    endpoint: 'events',
     limit: String(limit),
     active: 'true',
     closed: 'false',
@@ -40,7 +39,8 @@ async function fetchPolymarket(limit = 30): Promise<Market[]> {
     ascending: 'false',
   });
 
-  const res = await fetch(`/api/polymarket?${params}`);
+  // Call Polymarket gamma API directly (CORS-friendly, no proxy needed)
+  const res = await fetch(`https://gamma-api.polymarket.com/events?${params}`);
   if (!res.ok) throw new Error(`Polymarket: ${res.status}`);
   const events = await res.json();
 

@@ -22,7 +22,7 @@ export default function PulseWall() {
     category,
     setCategory,
     refresh,
-  } = useMarkets(60000);
+  } = useMarkets(300000);
 
   const [theme, setTheme] = useState<ThemeMode>('dark-concrete');
   const [selected, setSelected] = useState<Market | null>(null);
