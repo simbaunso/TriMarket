@@ -236,9 +236,9 @@ export async function fetchAllMarkets(
   const allMarkets: Market[] = [];
 
   const fetchers: { platform: Platform; fn: () => Promise<Market[]>; timeout: number }[] = [
-    { platform: 'polymarket', fn: () => fetchPolymarket(limit * 3), timeout: 15000 },
-    { platform: 'kalshi', fn: () => fetchKalshi(limit * 3), timeout: 20000 },
-    { platform: 'opinion', fn: () => fetchOpinion(limit * 3), timeout: 20000 },
+    { platform: 'polymarket', fn: () => fetchPolymarket(limit), timeout: 15000 },
+    { platform: 'kalshi', fn: () => fetchKalshi(limit), timeout: 20000 },
+    { platform: 'opinion', fn: () => fetchOpinion(limit), timeout: 20000 },
   ];
 
   const results = await Promise.allSettled(

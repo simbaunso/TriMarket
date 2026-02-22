@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const res = await fetch(`${GAMMA_API}/${endpoint}?${params.toString()}`, {
-      next: { revalidate: 30 },
+      next: { revalidate: 120 },
     });
 
     if (!res.ok) {
@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
 
     const data = await res.json();
     return NextResponse.json(data, {
-      headers: { 'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=60' },
+      headers: { 'Cache-Control': 'public, s-maxage=120, stale-while-revalidate=300' },
     });
   } catch (error) {
     return NextResponse.json(
