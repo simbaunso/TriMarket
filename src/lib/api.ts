@@ -28,10 +28,7 @@ function deriveCategory(tags: string[], title: string): string {
   return 'culture';
 }
 
-// CORS proxy for APIs that block direct browser requests
-const CORS_PROXY = 'https://corsproxy.io/?';
-
-// ─── Polymarket (direct — CORS-friendly) ─────────────────
+// ─── Polymarket (via Vercel rewrite) ──────────────────────
 async function fetchPolymarket(limit = 30): Promise<Market[]> {
   const params = new URLSearchParams({
     limit: String(limit),
@@ -41,7 +38,7 @@ async function fetchPolymarket(limit = 30): Promise<Market[]> {
     ascending: 'false',
   });
 
-  const res = await fetch(`https://gamma-api.polymarket.com/events?${params}`);
+  const res = await fetch(`/proxy/poly/events?${params}`);
   if (!res.ok) throw new Error(`Polymarket: ${res.status}`);
   const events = await res.json();
 
@@ -87,7 +84,7 @@ async function fetchPolymarket(limit = 30): Promise<Market[]> {
   return markets;
 }
 
-// ─── Kalshi (via CORS proxy) ─────────────────────────────
+// ─── Kalshi (via Vercel rewrite) ──────────────────────────
 async function fetchKalshi(limit = 30): Promise<Market[]> {
   const allMarkets: Market[] = [];
   const params = new URLSearchParams({
@@ -96,8 +93,7 @@ async function fetchKalshi(limit = 30): Promise<Market[]> {
     with_nested_markets: 'true',
   });
 
-  const url = `${CORS_PROXY}${encodeURIComponent(`https://api.elections.kalshi.com/trade-api/v2/events?${params}`)}`;
-  const res = await fetch(url);
+  const res = await fetch(`/proxy/kalshi/events?${params}`);
   if (!res.ok) throw new Error(`Kalshi: ${res.status}`);
   const data = await res.json();
   const events = data.events || [];
@@ -142,7 +138,7 @@ async function fetchKalshi(limit = 30): Promise<Market[]> {
   return allMarkets.slice(0, limit);
 }
 
-// ─── Opinion (via CORS proxy) ────────────────────────────
+// ─── Opinion (via Vercel rewrite) ─────────────────────────
 async function fetchOpinion(limit = 30): Promise<Market[]> {
   const params = new URLSearchParams({
     limit: String(limit),
@@ -151,8 +147,7 @@ async function fetchOpinion(limit = 30): Promise<Market[]> {
     status: '2',
   });
 
-  const url = `${CORS_PROXY}${encodeURIComponent(`https://proxy.opinion.trade:8443/api/bsc/api/v2/topic?${params}`)}`;
-  const res = await fetch(url);
+  const res = await fetch(`/proxy/opinion/topic?${params}`);
   if (!res.ok) throw new Error(`Opinion: ${res.status}`);
   const data = await res.json();
 
