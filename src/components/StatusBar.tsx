@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import type { Platform, FetchResult } from '@/types/market';
 
@@ -21,7 +22,8 @@ export default function StatusBar({
   loading: boolean;
 }) {
   const errorPlatforms = new Set(errors.map(e => e.platform));
-  const ago = lastUpdate ? Math.round((Date.now() - lastUpdate) / 1000) : null;
+  const [now] = useState(() => Date.now());
+  const ago = lastUpdate ? Math.round((now - lastUpdate) / 1000) : null;
 
   return (
     <div

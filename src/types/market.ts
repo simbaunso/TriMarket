@@ -17,6 +17,7 @@ export interface Market {
   volume: number;
   volume24h?: number;
   liquidity?: number;
+  collateralCurrency?: 'pUSD' | 'USD';
   endDate: string | null;
   status: 'active' | 'closed' | 'resolved';
   createdAt: string;
@@ -25,6 +26,41 @@ export interface Market {
   // Pulse wall data
   pulseIntensity: number;   // 0-1 based on probability confidence
   shockwaveStrength: number; // 0-1 based on volume spike
+}
+
+export interface PolymarketTag {
+  label: string;
+}
+
+export interface PolymarketEvent {
+  id?: string;
+  title?: string;
+  description?: string;
+  slug?: string;
+  image?: string;
+  endDate?: string;
+  createdAt?: string;
+  tags?: PolymarketTag[];
+  markets?: PolymarketRawMarket[];
+}
+
+export interface PolymarketRawMarket {
+  id: string;
+  question?: string;
+  groupItemTitle?: string;
+  description?: string;
+  slug?: string;
+  image?: string;
+  outcomePrices?: string;
+  volume?: string | number;
+  volume24hr?: number;
+  liquidity?: string | number;
+  endDate?: string;
+  active?: boolean;
+  closed?: boolean;
+  createdAt?: string;
+  clobTokenIds?: string;
+  conditionId?: string;
 }
 
 export interface FetchResult {

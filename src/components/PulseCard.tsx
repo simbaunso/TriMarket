@@ -32,6 +32,7 @@ export default function PulseCard({
   const colors = PLATFORM_COLORS[market.platform];
   const yesPrice = market.outcomes[0]?.price ?? 0.5;
   const pct = Math.round(yesPrice * 100);
+  const [now] = useState(() => Date.now());
 
   const pulseDuration = Math.max(0.4, 2 - market.pulseIntensity * 1.6);
 
@@ -176,7 +177,7 @@ export default function PulseCard({
           {isFeatured && market.endDate && (
             <div className="mt-2 text-[9px] font-bold uppercase tracking-wider opacity-30">
               {(() => {
-                const diff = new Date(market.endDate).getTime() - Date.now();
+                const diff = new Date(market.endDate).getTime() - now;
                 if (diff <= 0) return 'ENDED';
                 const days = Math.floor(diff / 86400000);
                 return days > 0 ? `${days}D LEFT` : `${Math.floor(diff / 3600000)}H LEFT`;

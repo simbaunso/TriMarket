@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import type { Market } from '@/types/market';
 import { formatVolume } from '@/lib/api';
@@ -20,10 +21,11 @@ export default function MarketDetail({
   const yesPrice = market.outcomes[0]?.price ?? 0.5;
   const noPrice = market.outcomes[1]?.price ?? 0.5;
   const color = PLATFORM_COLORS[market.platform];
+  const [now] = useState(() => Date.now());
 
   const timeLeft = market.endDate
     ? (() => {
-        const diff = new Date(market.endDate).getTime() - Date.now();
+        const diff = new Date(market.endDate).getTime() - now;
         if (diff <= 0) return 'ENDED';
         const days = Math.floor(diff / 86400000);
         const hours = Math.floor((diff % 86400000) / 3600000);
@@ -72,6 +74,11 @@ export default function MarketDetail({
                 <span className="text-[9px] font-black uppercase tracking-[0.2em] opacity-40">
                   {market.category}
                 </span>
+                {market.collateralCurrency && (
+                  <span className="text-[9px] font-black uppercase tracking-[0.2em] opacity-40">
+                    {market.collateralCurrency}
+                  </span>
+                )}
                 {timeLeft && (
                   <span className="text-[9px] font-black uppercase tracking-wider opacity-40 ml-auto">
                     {timeLeft}

@@ -49,7 +49,9 @@ export function useMarkets(
 
   useEffect(() => {
     refresh();
-  }, [refresh]);
+    const intervalId = window.setInterval(refresh, refreshInterval);
+    return () => window.clearInterval(intervalId);
+  }, [refresh, refreshInterval]);
 
   const filtered = category === 'all'
     ? markets

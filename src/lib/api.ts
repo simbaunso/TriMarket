@@ -1,4 +1,5 @@
-import type { Market, Platform, FetchResult } from '@/types/market';
+import type { FetchResult, Market, Platform, PolymarketEvent, PolymarketRawMarket } from '@/types/market';
+import { POLYMARKET_COLLATERAL_CURRENCY, POLYMARKET_PROXY_ENDPOINTS } from '@/lib/polymarket';
 
 // ─── Helpers ──────────────────────────────────────────────
 function formatVolume(v: number): string {
@@ -28,8 +29,44 @@ function deriveCategory(tags: string[], title: string): string {
   return 'culture';
 }
 
+function normalizePolymarketMarket(event: PolymarketEvent, m: PolymarketRawMarket): Market {
+  let prices: string[] = ['0.5', '0.5'];
+  try { prices = JSON.parse(m.outcomePrices || '["0.5","0.5"]'); } catch {}
+
+  const yesPrice = Number.parseFloat(String(prices[0])) || 0.5;
+  const volume = Number.parseFloat(String(m.volume ?? '0')) || 0;
+  const v24h = m.volume24hr || 0;
+
+  return {
+    id: `poly_${m.id}`,
+    platform: 'polymarket',
+    question: m.question || m.groupItemTitle || event.title || '',
+    description: m.description || event.description || '',
+    category: deriveCategory(
+      event.tags?.map(t => t.label) || [],
+      m.question || event.title || ''
+    ),
+    image: m.image || event.image,
+    outcomes: [
+      { name: 'Yes', price: yesPrice },
+      { name: 'No', price: 1 - yesPrice },
+    ],
+    volume,
+    volume24h: v24h,
+    liquidity: Number.parseFloat(String(m.liquidity ?? '0')) || 0,
+    collateralCurrency: POLYMARKET_COLLATERAL_CURRENCY,
+    endDate: m.endDate || event.endDate || null,
+    status: m.active ? 'active' : m.closed ? 'closed' : 'resolved',
+    createdAt: m.createdAt || event.createdAt || new Date().toISOString(),
+    url: `https://polymarket.com/event/${event.slug || m.slug}`,
+    tags: event.tags?.map(t => t.label) || [],
+    pulseIntensity: calcPulseIntensity(yesPrice),
+    shockwaveStrength: calcShockwave(v24h, volume),
+  };
+}
+
 // ─── Polymarket (via Vercel rewrite) ──────────────────────
-async function fetchPolymarket(limit = 30): Promise<Market[]> {
+export async function fetchPolymarket(limit = 30): Promise<Market[]> {
   const params = new URLSearchParams({
     limit: String(limit),
     active: 'true',
@@ -38,47 +75,16 @@ async function fetchPolymarket(limit = 30): Promise<Market[]> {
     ascending: 'false',
   });
 
-  const res = await fetch(`/proxy/poly/events?${params}`);
+  const res = await fetch(`${POLYMARKET_PROXY_ENDPOINTS.gamma}/events?${params}`);
   if (!res.ok) throw new Error(`Polymarket: ${res.status}`);
-  const events = await res.json();
+  const events: PolymarketEvent[] = await res.json();
 
   const markets: Market[] = [];
   for (const event of events) {
     if (!event.markets?.length) continue;
     const topMarkets = event.markets.slice(0, 2);
     for (const m of topMarkets) {
-      let prices: string[] = ['0.5', '0.5'];
-      try { prices = JSON.parse(m.outcomePrices); } catch {}
-
-      const yesPrice = parseFloat(String(prices[0])) || 0.5;
-      const volume = parseFloat(m.volume) || 0;
-      const v24h = m.volume24hr || 0;
-
-      markets.push({
-        id: `poly_${m.id}`,
-        platform: 'polymarket',
-        question: m.question || m.groupItemTitle || event.title,
-        description: m.description || event.description || '',
-        category: deriveCategory(
-          event.tags?.map((t: { label: string }) => t.label) || [],
-          m.question || event.title || ''
-        ),
-        image: m.image || event.image,
-        outcomes: [
-          { name: 'Yes', price: yesPrice },
-          { name: 'No', price: 1 - yesPrice },
-        ],
-        volume,
-        volume24h: v24h,
-        liquidity: parseFloat(m.liquidity) || 0,
-        endDate: m.endDate || event.endDate || null,
-        status: m.active ? 'active' : m.closed ? 'closed' : 'resolved',
-        createdAt: m.createdAt || event.createdAt || new Date().toISOString(),
-        url: `https://polymarket.com/event/${event.slug || m.slug}`,
-        tags: event.tags?.map((t: { label: string }) => t.label) || [],
-        pulseIntensity: calcPulseIntensity(yesPrice),
-        shockwaveStrength: calcShockwave(v24h, volume),
-      });
+      markets.push(normalizePolymarketMarket(event, m));
     }
   }
   return markets;
